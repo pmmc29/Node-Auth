@@ -42,7 +42,7 @@ passport.use('local', new LocalStrategy({
                 return done(err)
             }
             if (result.rows[0] == null) {
-                req.flash('danger', "Oops. Incorrect login details.");
+                console.log('danger', "Oops. Incorrect login details.");
                 return done(null, false);
             } else {
                 bcrypt.compare(password, result.rows[0].pass, function (err, check) {
@@ -56,7 +56,7 @@ passport.use('local', new LocalStrategy({
                             // pass: result.rows[0].pass
                         });
                     } else {
-                        req.flash('danger', "Oops. Incorrect login details.");
+                        console.log('danger', "Oops. Incorrect login details.");
                         return done(null, false);
                     }
                 });

@@ -1,11 +1,10 @@
 const express = require('express')
 const router = express.Router()
-
 const bcrypt = require('bcrypt-nodejs')
-
 const passport = require('passport')
-
 const pool = require('../database')
+const multer = require('multer')
+const path = require('path')
 
 //-------------ROUTES-------------------
 router.get('/', function (req, res, next) {
@@ -22,19 +21,56 @@ router.get('/', function (req, res, next) {
             }
         });
     }
-
 });
+//-------------UPLOAD PHOTOS------------------
+//Set Storage Engine
+const storage = multer.diskStorage({
+    destination: path.join(__dirname, '../photos'),
+    filename: function (req, file, cb) {
+        const user = req.body
+        // console.log(user.email)
+        cb(null, user.email + path.extname(file.originalname))
+    }
+})
+
+const uploadPhoto = multer({
+    storage: storage,
+    limits: {
+        fileSize: 500000
+    },
+    fileFilter: function (req, file, cb) {
+        checkFileType(file, cb)
+    }
+}).single('myPhoto')
+
+function checkFileType(file, cb) {
+    //extenciones permitidas
+    const filetypes = /jpeg|jpg|png|gif/
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase())
+    //check mime type
+    const mimetype = filetypes.test(file.mimetype)
+
+    if (mimetype && extname) {
+        return cb(null, true)
+    } else {
+        cb('Error: Images Only!')
+    }
+}
 //----------------------------------------------
 router.get('/signup', function (req, res, next) {
-    res.render('signup', {
-        title: "Sign Up",
-        userData: req.user,
-        messages: {
-            danger: req.flash('danger'),
-            warning: req.flash('warning'),
-            success: req.flash('success')
-        }
-    });
+    if (req.isAuthenticated()) {
+        res.redirect('/profile');
+    } else {
+        res.render('signup', {
+            title: "Sign Up",
+            user: req.user,
+            messages: {
+                danger: req.flash('danger'),
+                warning: req.flash('warning'),
+                success: req.flash('success')
+            }
+        });
+    }
 });
 
 router.post('/signup', async function (req, res) {
@@ -45,25 +81,26 @@ router.post('/signup', async function (req, res) {
         var pwd = await bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10));
         await JSON.stringify(client.query('SELECT id FROM usuarios WHERE email=$1', [req.body.email], function (err, result) {
             if (result.rows[0]) {
-                req.flash('warning', "This email address is already registered. <a href='/login'>Log in!</a>");
-                res.redirect('/join');
+                console.log('warning', "This email address is already registered. <a href='/login'>Log in!</a>");
+                res.redirect('/signup');
             } else {
-                client.query('INSERT INTO usuarios (email, pass) VALUES ($1, $2)', [req.body.email, pwd], function (err, result) {
-                    if (err) {
-                        console.log(err);
-                    } else {
+                if (req.body.email == '') {
+                    console.log('Ingrese un email valido')
+                } else {
+                    client.query('INSERT INTO usuarios (email, pass) VALUES ($1, $2)', [req.body.email, pwd], function (err, result) {
+                        if (err) {
+                            console.log('ERROR: ', err);
+                        } else {
 
-                        client.query('COMMIT')
-                        // console.log(result)
-                        req.flash('success', 'User created.')
-                        res.redirect('/login');
-                        return;
-                    }
-                });
-
-
+                            client.query('COMMIT')
+                            console.log('AQUI ', result)
+                            console.log('success', 'User created.')
+                            res.redirect('/login');
+                            return;
+                        }
+                    });
+                }
             }
-
         }));
         client.release();
     } catch (e) {
@@ -89,16 +126,16 @@ router.get('/login', function (req, res, next) {
 });
 
 router.post('/login', passport.authenticate('local', {
-    successRedirect: '/profile',
-    failureRedirect: '/signup',
-    failureFlash: true
+    successRedirect: '/',
+    failureRedirect: '/login'
+    // failureFlash: true
 }), function (req, res) {
     if (req.body.remember) {
         req.session.cookie.maxAge = 1 * 24 * 60 * 60 * 1000; // Cookie expires after 1 day
     } else {
         req.session.cookie.expires = false; // Cookie expires at end of session
     }
-    res.redirect('/');
+    // res.redirect('/');
 });
 //----------------------------------------------
 router.get('/logout', function (req, res) {

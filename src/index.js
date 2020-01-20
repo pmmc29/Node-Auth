@@ -34,8 +34,8 @@ app.use(passport.initialize()) //inicializar passport
 app.use(passport.session())
 
 //routes
-// app.use('/', require('./api/queries'))
 app.use('/', require('./routes/routes'))
+app.use('/photos', express.static(__dirname + '/photos'))
 
 //starting the server
 app.listen(app.get('port'), () => {
