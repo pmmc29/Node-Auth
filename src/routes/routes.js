@@ -76,16 +76,16 @@ router.get('/signup', function (req, res, next) {
 router.post('/signup', async function (req, res) {
 
     try {
-        const client = await pool.connect()
-        await client.query('BEGIN')
-        var pwd = await bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10));
-        await JSON.stringify(client.query('SELECT id FROM usuarios WHERE email=$1', [req.body.email], function (err, result) {
-            if (result.rows[0]) {
-                console.log('warning', "This email address is already registered. <a href='/login'>Log in!</a>");
-                res.redirect('/signup');
-            } else {
-                if (req.body.email == '') {
-                    console.log('Ingrese un email valido')
+        if (req.body.password == '' | req.body.email == '') {
+            console.log('Ingrese datos validos! SIGNUP')
+        } else {
+            const client = await pool.connect()
+            await client.query('BEGIN')
+            var pwd = await bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10));
+            await JSON.stringify(client.query('SELECT id FROM usuarios WHERE email=$1', [req.body.email], function (err, result) {
+                if (result.rows[0]) {
+                    console.log('warning', "This email address is already registered. <a href='/login'>Log in!</a>");
+                    res.redirect('/signup');
                 } else {
                     client.query('INSERT INTO usuarios (email, pass) VALUES ($1, $2)', [req.body.email, pwd], function (err, result) {
                         if (err) {
@@ -100,9 +100,9 @@ router.post('/signup', async function (req, res) {
                         }
                     });
                 }
-            }
-        }));
-        client.release();
+            }));
+            client.release();
+        }
     } catch (e) {
         throw (e)
     }
@@ -126,16 +126,15 @@ router.get('/login', function (req, res, next) {
 });
 
 router.post('/login', passport.authenticate('local', {
-    successRedirect: '/',
     failureRedirect: '/login'
-    // failureFlash: true
 }), function (req, res) {
     if (req.body.remember) {
-        req.session.cookie.maxAge = 1 * 24 * 60 * 60 * 1000; // Cookie expires after 1 day
-    } else {
+        console.log('remember')
         req.session.cookie.expires = false; // Cookie expires at end of session
+    } else {
+        req.session.cookie.maxAge = 5000; // Cookie expires after 5 seconds
     }
-    // res.redirect('/');
+    res.redirect('/');
 });
 //----------------------------------------------
 router.get('/logout', function (req, res) {
