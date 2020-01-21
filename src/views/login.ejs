@@ -1,12 +1,20 @@
 <% include index.ejs %>
-<h1>Iniciar Sesion</h1>
+<% include resources.ejs %>
 <%= typeof msg != 'undefined' ? msg : '' %>
-<form action="/login" method="POST">
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <input type="checkbox" name="remember" placeholder="Recuerdame">Recuerdame</input>
-
-    <button type="submit">
-        Log In
-    </button>
-</form>
+<div class="row center">
+    <h1>Iniciar Sesion</h1>
+    <div class="col s3"></div>
+    <div class="input-field center col s6">
+        <form action="/login" method="POST">
+            <input type="email" name="email" placeholder="Email" required class="input-field">
+            <input type="password" name="password" placeholder="Password" required>
+            <label>
+                <input type="checkbox" name="remember" class="filled-in" />
+                <span>Recuerdame</span>
+            </label>
+            <button type="submit" class="btn">
+                Log In
+            </button>
+        </form>
+    </div>
+</div>

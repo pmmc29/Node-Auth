@@ -1,10 +1,23 @@
 <% include index.ejs %>
-<h1>Registro</h1>
 <%= typeof msg != 'undefined' ? msg : '' %>
-<form action="/signup" method="POST" id="form1" enctype="multipart/form-data">
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <br>
-    <input type="file" name="myPhoto">
-    <input type="submit" value="Register">
-</form>
+<div class="row center">
+    <h1>Registro</h1>
+    <div class="col s3"></div>
+    <div class="input-field col s6">
+        <form action="/signup" method="POST" id="form1" enctype="multipart/form-data">
+            <input type="email" name="email" placeholder="Email" required class="input-field">
+            <input type="password" name="password" placeholder="Password" required class="input-field">
+            <br>
+            <div class="file-field input-field">
+                <div class="btn">
+                    <span>Photo</span>
+                    <input type="file" name="myPhoto">
+                </div>
+                <div class="file-path-wrapper">
+                    <input class="file-path validate" type="text">
+                </div>
+            </div>
+            <input type="submit" value="Register" class="btn">
+        </form>
+    </div>
+</div>
