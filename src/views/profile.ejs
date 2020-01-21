@@ -4,5 +4,7 @@
     Email: <%= user.email%><br />
 
 </p>
-
+<div>
+    <img src="<%= typeof file != 'undefined' ? file : '' %>" class="responsive-file" style="height: 300px;">
+</div>
 <button><a href="/logout">Log Out</a></button>
