@@ -1,8 +1,14 @@
 <% include index.ejs %>
 <% include resources.ejs %>
+
 <%= typeof msg != 'undefined' ? msg : '' %>
+
+
 <div class="row center">
     <h1>Iniciar Sesion</h1>
+    <%if (loginMessage) { %>
+    <div><%= loginMessage%></div>
+    <% }%>
     <div class="col s3"></div>
     <div class="input-field center col s6">
         <form action="/login" method="POST">

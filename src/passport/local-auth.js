@@ -6,20 +6,6 @@ const bcrypt = require('bcrypt-nodejs')
 const pool = require('../database')
 
 
-// async function test() {
-//     return await pool.query('insert into usuarios (email, pass) values ($1, $2)', ['test@test.com', bcrypt.hashSync('pedro123', bcrypt.genSaltSync(10))], function (err, result) {
-//         if (err) {
-//             console.log('el email existe')
-//         } else {
-//             console.log(result, 'exitoso')
-//         }
-//     })
-// }
-// test()
-
-
-// console.log(bcrypt.hashSync('pedro123', bcrypt.genSaltSync(10)))
-
 passport.serializeUser(function (user, done) {
     done(null, user);
 });
@@ -45,8 +31,8 @@ passport.use('local', new LocalStrategy({
                     return done(err)
                 }
                 if (result.rows[0] == null) {
-                    console.log('danger', "Oops. Incorrect login details.");
-                    return done(null, false);
+                    console.log('User not found.');
+                    return done(null, false, req.flash('loginMessage', 'User not Found.'));
                 } else {
                     bcrypt.compare(password, result.rows[0].pass, function (err, check) {
                         if (err) {

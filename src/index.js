@@ -24,14 +24,19 @@ app.use(morgan('dev'))
 app.use(express.urlencoded({
     extended: false
 }))
-app.use(flash());
 app.use(session({
     secret: 'mysecrect',
     resave: false,
     saveUninitialized: false
 }))
+app.use(flash());
 app.use(passport.initialize()) //inicializar passport
 app.use(passport.session())
+
+app.use((req, res, next) => {
+    app.locals.loginMessage = req.flash('loginMessage')
+    next()
+})
 
 //routes
 app.use('/', require('./routes/routes'))
