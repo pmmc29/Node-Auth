@@ -5,7 +5,7 @@ const passport = require('passport')
 const pool = require('../database')
 const multer = require('multer')
 const path = require('path')
-const upload = multer()
+const QRCode = require('qrcode')
 
 //-------------ROUTES-------------------
 router.get('/', function (req, res, next) {
@@ -37,7 +37,7 @@ const storage = multer.diskStorage({
 const uploadPhoto = multer({
     storage: storage,
     limits: {
-        fileSize: 1000000
+        fileSize: 5000000
     },
     fileFilter: function (req, file, cb) {
         checkFileType(file, cb)
@@ -77,11 +77,11 @@ router.get('/signup', function (req, res, next) {
 router.post('/signup', async function (req, res) {
 
     try {
-        console.log('1:', req.body, req.body.password)
+        console.log('1:', req.body, req.body.password) //sin valor en el body
         const client = await pool.connect()
         await client.query('BEGIN')
         await JSON.stringify(client.query('SELECT id FROM usuarios WHERE email=$1', [req.body.email], function (err, result) {
-            console.log('2:', req.body.email, req.body.password)
+            console.log('2:', req.body.email, req.body.password) //sin valor en el body
             if (result.rows[0]) {
                 console.log('warning', "This email address is already registered. <a href='/login'>Log in!</a>");
                 res.redirect('/signup');
@@ -168,11 +168,15 @@ router.get('/logout', function (req, res) {
 //----------------------------------------------
 router.get('/profile', async function (req, res, next) {
     if (req.isAuthenticated()) {
-        res.render('profile', {
-            title: "Profile",
-            user: req.user,
-            file: `photos/${req.user.email}.jpg`
-        });
+        QRCode.toDataURL(`${req.user.id}`, function (err, url) {
+            // console.log(url)
+            res.render('profile', {
+                title: "Profile",
+                user: req.user,
+                qr: `${url}`,
+                file: `photos/${req.user.email}.jpg`
+            });
+        })
         console.log(req.user.id)
     } else {
         res.redirect('/login');

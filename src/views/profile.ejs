@@ -9,5 +9,11 @@
     <div>
         <img src=" <%= typeof file != 'undefined' ? file : '' %>" class="responsive-file" style="height: 300px;">
     </div>
+    <div>
+        <p>
+            QR:
+        </p>
+        <img src="<%= typeof qr != 'undefined' ? qr : '' %>" height="150" width="150">
+    </div>
     <button onclick="location.href = '/logout'" class="btn">Log Out</button>
 </div>
